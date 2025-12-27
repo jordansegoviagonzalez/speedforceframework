@@ -1,0 +1,32 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# --- Distribution / Build ---
+dist/
+build/
+_skbuild/
+*.egg-info/
+.eggs/
+
+# --- C++ / CMake ---
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.dylib
+*.so
+*.a
+*.o
+
+# --- Generated Build Dependencies ---
+# (Ignores downloads from FetchContent if they land in root)
+_deps/
+
+# --- IDEs / System ---
+.vscode/
+.idea/
+.DS_Store

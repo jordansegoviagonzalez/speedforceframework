@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package speedforce.server;
+
+service SpeedForceService {
+  // Health Check (Standard for Load Balancers/K8s)
+  rpc HealthCheck (HealthCheckRequest) returns (HealthCheckResponse) {}
+
+  // Load a model into the engine
+  rpc LoadModel (LoadModelRequest) returns (LoadModelResponse) {}
+
+  // Run inference on a loaded model
+  rpc Infer (InferenceRequest) returns (InferenceResponse) {}
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  enum ServingStatus {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+  }
+  ServingStatus status = 1;
+}
+
+message LoadModelRequest {
+  string model_path = 1;
+  string model_name = 2; // Optional alias
+  // Future: device config, optimization flags
+}
+
+message LoadModelResponse {
+  bool success = 1;
+  string message = 2;
+  string model_id = 3;
+}
+
+message InferenceRequest {
+  string model_id = 1;
+  // For simplicity in Phase 1, we pass data as a comma-separated string.
+  // In production, this would be a serialized TensorProto or raw bytes.
+  string input_data = 2; 
+  repeated int64 shape = 3;
+}
+
+message InferenceResponse {
+  bool success = 1;
+  string message = 2;
+  string output_data = 3;
+  string model_id = 4;
+}

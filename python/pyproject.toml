@@ -1,0 +1,50 @@
+[build-system]
+requires = ["scikit-build-core>=0.4.3", "pybind11>=2.10"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "speedforce"
+version = "0.1.0"
+description = "A high-performance, hardware-agnostic inference engine"
+readme = "README.md"
+authors = [
+    { name = "SpeedForce Team", email = "info@speedforce.ai" },
+]
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: C++",
+]
+dependencies = [
+    "numpy", 
+]
+
+[project.urls]
+"Homepage" = "https://github.com/your-repo/speedforce"
+"Bug Tracker" = "https://github.com/your-repo/speedforce/issues"
+
+[tool.scikit-build]
+cmake.version = ">=3.24"
+# Direct CMake to the root of the repo, not the python dir
+cmake.source-dir = ".."
+# Ensure we build in Release mode for performance
+cmake.build-type = "Release"
+cmake.args = [
+  "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
+  "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64"
+]
+
+[tool.cibuildwheel]
+# This section tells GitHub Actions how to build the wheels
+# Skip 32-bit builds and PyPy to save time/space
+skip = "cp36-* cp37-* pp* *-musllinux*"
+test-command = "python {project}/benchmarks/run_benchmark.py"
+# We need to install the package to test it
+test-skip = "*-macosx_arm64 *-macosx_universal2:arm64" 
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = ["tests"]

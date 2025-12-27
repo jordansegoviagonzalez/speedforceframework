@@ -1,0 +1,64 @@
+name: Build and Publish Wheels
+
+on:
+  workflow_dispatch: # Allow manual trigger
+  release:
+    types: [published] # Trigger on GitHub Release
+
+jobs:
+  build_wheels:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # We build on Linux, Windows, and macOS
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true # IMPORTANT: Fetch C++ submodules if any
+
+      # Setup Python
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      # Install cibuildwheel
+      - name: Install cibuildwheel
+        run: python -m pip install cibuildwheel==2.16.5
+
+      # Build Wheels using cibuildwheel
+      # It uses the [tool.cibuildwheel] config in pyproject.toml
+      - name: Build wheels
+        run: python -m cibuildwheel --output-dir wheelhouse
+        env:
+          # Point to the python directory where pyproject.toml lives
+          CIBW_PROJECT_REQUIRES_PYTHON: ">=3.8"
+          # We need to tell it where the package definition is
+          CIBW_WORKING_DIRECTORY: "python" 
+
+      # Upload artifacts (The built wheels) to GitHub
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
+
+  publish_pypi:
+    needs: [build_wheels]
+    runs-on: ubuntu-latest
+    # Only publish to PyPI on a real release, not on every push
+    if: github.event_name == 'release' && github.event.action == 'published'
+    permissions:
+      id-token: write # Required for trusted publishing
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: cibw-wheels-*
+          path: dist
+          merge-multiple: true
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        # Note: You need to configure PyPI Trusted Publishing on pypi.org
+        # or set a PYPI_API_TOKEN secret in GitHub repo settings.
