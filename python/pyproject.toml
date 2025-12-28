@@ -3,7 +3,7 @@ requires = ["scikit-build-core>=0.4.3", "pybind11>=2.10"]
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "speedforce"
+name = "speedforceframework"
 version = "0.1.0"
 description = "A high-performance, hardware-agnostic inference engine"
 readme = "README.md"
